@@ -26,74 +26,10 @@ where each childnode can likewise have rv nodes as children
 depth of the tree determines number of values in series
 */
 
-type Node struct {
-	total_value float32
-	level       int
-	item_list   []int
-}
-
-/*
-node
-  array of
-    total value (uint32)
-	items that make up that total (index into the resistor_values array, []int)
-	{0, []} is null value/node
-*/
-
-func initial_fill(depth int) []Node {
-	// create initial node list
-	nodes := make([]Node, 0, resistor_count)
-
-	// add a new node for each value in resistor_values
-	for i := 0; i < resistor_count; i++ {
-		node := Node{resistor_values[i], depth, []int{}}
-		node.item_list = append(node.item_list, i)
-		nodes = append(nodes, node)
-	}
-	return nodes
-}
-
-func add_resistor(depth int, nodes []Node) []Node {
-	// if depth is down to 0, stop
-	if depth > 0 {
-		// scan nodes for nodes that have depth depth and create new nodes from each node
-		for i := 0; i < len(nodes); i++ {
-			node := nodes[i]
-			if node.level == depth {
-				// start by adding only the series values
-
-				// create new node list
-				new_nodes := make([]Node, 0, len(nodes)*resistor_count)
-
-				// add a new node for the current node value + each value in resistor_values
-				for j := 0; j < resistor_count; j++ {
-					new_node := Node{node.total_value + resistor_values[j], depth - 1, []int{}}
-					new_node.item_list = append(new_node.item_list, node.item_list...)
-					new_node.item_list = append(new_node.item_list, i)
-					new_nodes = append(new_nodes, new_node)
-				}
-
-			}
-		}
-		// create new []node to store results
-
-		// if nodes is empty, do initial fill
-		if nodes == nil {
-		}
-		// scan nodes for nodes that have depth = depth
-		nodes = make([]Node, 0, resistor_count)
-
-		// add resistor values to each item in nodes
-
-		// call another_round on each node in nodes with i - 1 when i > 1
-
-	}
-	return nodes
-}
-
 func main() {
-	nodes := initial_fill(1)
-	fmt.Print(len(nodes))
-	nodes := add_resistor(1, nil)
+	nodes := new(Nodes)
+	nodes.initial_fill(2)
+	fmt.Print(len(*nodes))
+	//	nodes := add_resistor(1, nil)
 
 }
