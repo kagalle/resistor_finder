@@ -2,7 +2,6 @@ package main
 
 type Node struct {
 	total_value float32
-	depth       int
 	item_list   []int
 	children    []Node
 }
@@ -21,23 +20,23 @@ func (nodes *Nodes) initial_fill(depth int) {
 	//nodes := *np
 	// add a new node for each value in resistor_values
 	for i := 0; i < resistor_count; i++ {
-		node := Node{resistor_values[i], depth, []int{}, []Node{}}
+		node := Node{resistor_values[i], []int{}, []Node{}}
 		node.item_list = append(node.item_list, i)
-		node.node_fill()
+		node.node_fill(depth)
 		*nodes = append(*nodes, node)
 	}
 	//*np = nodes
 }
 
-func (node *Node) node_fill() {
+func (node *Node) node_fill(depth int) {
 	// if depth is down to 0, stop
-	if node.depth > 1 {
+	if depth > 1 {
 		// add children to node
 		for i := 0; i < resistor_count; i++ {
-			child := Node{node.total_value + resistor_values[i], node.depth - 1, []int{}, []Node{}}
+			child := Node{node.total_value + resistor_values[i], []int{}, []Node{}}
 			child.item_list = append(child.item_list, node.item_list...)
 			child.item_list = append(child.item_list, i)
-			child.node_fill()
+			child.node_fill(depth - 1)
 			node.children = append(node.children, child)
 		}
 	}
