@@ -30,6 +30,9 @@ func main() {
 	nodes := new(Nodes)
 	nodes.initial_fill(2)
 	fmt.Print(len(*nodes))
-	//	nodes := add_resistor(1, nil)
+	node_result := nodes.getResults()
+	for i := 0; i < len(node_result); i++ {
+		fmt.Println(node_result[i].asString())
+	}
 
 }

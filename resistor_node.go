@@ -1,27 +1,74 @@
 package main
 
+import (
+	"fmt"
+)
+
 type Node struct {
-	total_value float32
-	item_list   []int
-	children    []Node
+	parent         *Node
+	resistor_index int
+	children       []Node
+}
+
+type NodeResult struct {
+	resistor_value       float32
+	resistor_arrangement string
 }
 
 type Nodes []Node
 
-/*
-node
-  array of
-    total value (uint32)
-	items that make up that total (index into the resistor_values array, []int)
-	{0, []} is null value/node
-*/
+func (nodeResult NodeResult) asString() string {
+	return fmt.Sprintf("%f\t%s", nodeResult.resistor_value, nodeResult.resistor_arrangement)
+}
+
+func (nodes Nodes) getResults() []NodeResult {
+	node_result := []NodeResult{}
+	for i := 0; i < len(nodes); i++ {
+		node_result = append(node_result, (nodes[i].getResults())...)
+	}
+	return node_result
+}
+
+// return both series and parallel values for node;return if this is result for a root (top/last) node
+func (node *Node) getResults() []NodeResult {
+	node_result := []NodeResult{}
+	if node.parent == nil {
+		node_result = append(node_result, NodeResult{
+			resistor_values[node.resistor_index],
+			fmt.Sprintf("%f", resistor_values[node.resistor_index]),
+		})
+	} else {
+		parent_result := node.parent.getResults()
+		// for each parent_result value, create two new results, one for series, one for parallel
+		for i := 0; i < len(parent_result); i++ {
+			// original
+			// node_result = append(node_result, parent_result[i])
+			// series
+			node_result = append(node_result, NodeResult{
+				parent_result[i].resistor_value + resistor_values[node.resistor_index],
+				fmt.Sprintf("(%f + %f)", parent_result[i].resistor_value, resistor_values[node.resistor_index]),
+			})
+
+			// parallel
+			node_result = append(node_result, NodeResult{
+				1.0 / ((1.0 / parent_result[i].resistor_value) + (1.0 / resistor_values[node.resistor_index])),
+				fmt.Sprintf("(%f | %f)", parent_result[i].resistor_value, resistor_values[node.resistor_index]),
+			})
+
+		}
+	}
+	// add in the node_results from each of the children
+	for i := 0; i < len(node.children); i++ {
+		node_result = append(node_result, node.children[i].getResults()...)
+	}
+	return node_result
+}
 
 func (nodes *Nodes) initial_fill(depth int) {
 	//nodes := *np
 	// add a new node for each value in resistor_values
 	for i := 0; i < resistor_count; i++ {
-		node := Node{resistor_values[i], []int{}, []Node{}}
-		node.item_list = append(node.item_list, i)
+		node := Node{nil, i, []Node{}}
 		node.node_fill(depth)
 		*nodes = append(*nodes, node)
 	}
@@ -33,9 +80,7 @@ func (node *Node) node_fill(depth int) {
 	if depth > 1 {
 		// add children to node
 		for i := 0; i < resistor_count; i++ {
-			child := Node{node.total_value + resistor_values[i], []int{}, []Node{}}
-			child.item_list = append(child.item_list, node.item_list...)
-			child.item_list = append(child.item_list, i)
+			child := Node{node, i, []Node{}}
 			child.node_fill(depth - 1)
 			node.children = append(node.children, child)
 		}
