@@ -7,7 +7,7 @@ import (
 type Node struct {
 	parent         *Node
 	resistor_index int
-	children       []Node
+	children       Nodes
 }
 
 type NodeResult struct {
@@ -22,9 +22,13 @@ func (nodeResult NodeResult) asString() string {
 }
 
 func (nodes Nodes) getResults() []NodeResult {
+	// walk the tree and for each node call node.getResults()
 	node_result := []NodeResult{}
 	for i := 0; i < len(nodes); i++ {
 		node_result = append(node_result, (nodes[i].getResults())...)
+		if len(nodes[i].children) > 0 {
+			node_result = append(node_result, nodes[i].children.getResults()...)
+		}
 	}
 	return node_result
 }
@@ -38,11 +42,10 @@ func (node *Node) getResults() []NodeResult {
 			fmt.Sprintf("%f", resistor_values[node.resistor_index]),
 		})
 	} else {
+		// use the parent value to create two new results, one for series, one for parallel
 		parent_result := node.parent.getResults()
 		// for each parent_result value, create two new results, one for series, one for parallel
 		for i := 0; i < len(parent_result); i++ {
-			// original
-			// node_result = append(node_result, parent_result[i])
 			// series
 			node_result = append(node_result, NodeResult{
 				parent_result[i].resistor_value + resistor_values[node.resistor_index],
@@ -54,12 +57,7 @@ func (node *Node) getResults() []NodeResult {
 				1.0 / ((1.0 / parent_result[i].resistor_value) + (1.0 / resistor_values[node.resistor_index])),
 				fmt.Sprintf("(%f | %f)", parent_result[i].resistor_value, resistor_values[node.resistor_index]),
 			})
-
 		}
-	}
-	// add in the node_results from each of the children
-	for i := 0; i < len(node.children); i++ {
-		node_result = append(node_result, node.children[i].getResults()...)
 	}
 	return node_result
 }
