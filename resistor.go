@@ -1,9 +1,11 @@
 package main
 
-import "fmt"
+// 2026 Kenneth Galle
 
-// number of resisters to combine in series
-// const resistor_depth = 2
+import (
+	"fmt"
+	"sort"
+)
 
 // list of resistor values to combine together
 var resistor_values = [...]float32{0.0, 1.0, 2.2, 3.3, 4.7, 5.1, 10.0,
@@ -15,22 +17,28 @@ var resistor_values = [...]float32{0.0, 1.0, 2.2, 3.3, 4.7, 5.1, 10.0,
 	100000.0, 200000.0, 300000.0, 390000.0, 470000.0, 680000.0, 1000000.0,
 	10000000.0}
 
+// var resistor_values = [...]float32{1.0, 10.0, 100.0}
+
 // number_of_values
 var resistor_count = len(resistor_values)
-
-// current_value[resistor_count]
 
 /*
 tree like with rv nodes in the root
 where each childnode can likewise have rv nodes as children
-depth of the tree determines number of values in series
+depth of the tree determines number of resistors combined together
 */
 
 func main() {
+	const DEPTH = 3
 	nodes := new(Nodes)
-	nodes.initial_fill(2)
-	fmt.Print(len(*nodes))
+	nodes.initial_fill(DEPTH)
+	fmt.Printf("%d nodes arranged %d deep\n\n", len(*nodes), DEPTH)
 	node_result := nodes.getResults()
+
+	sort.Slice(node_result, func(i, j int) bool {
+		return node_result[i].resistor_value < node_result[j].resistor_value
+	})
+
 	for i := 0; i < len(node_result); i++ {
 		fmt.Println(node_result[i].asString())
 	}

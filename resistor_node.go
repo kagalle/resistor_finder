@@ -1,5 +1,7 @@
 package main
 
+// 2026 Kenneth Galle
+
 import (
 	"fmt"
 )
@@ -49,13 +51,13 @@ func (node *Node) getResults() []NodeResult {
 			// series
 			node_result = append(node_result, NodeResult{
 				parent_result[i].resistor_value + resistor_values[node.resistor_index],
-				fmt.Sprintf("(%f + %f)", parent_result[i].resistor_value, resistor_values[node.resistor_index]),
+				fmt.Sprintf("(%s + %f)", parent_result[i].resistor_arrangement, resistor_values[node.resistor_index]),
 			})
 
 			// parallel
 			node_result = append(node_result, NodeResult{
 				1.0 / ((1.0 / parent_result[i].resistor_value) + (1.0 / resistor_values[node.resistor_index])),
-				fmt.Sprintf("(%f | %f)", parent_result[i].resistor_value, resistor_values[node.resistor_index]),
+				fmt.Sprintf("(%s | %f)", parent_result[i].resistor_arrangement, resistor_values[node.resistor_index]),
 			})
 		}
 	}
